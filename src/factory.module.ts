@@ -1,4 +1,5 @@
-import { DiscoveryService } from '@nestjs/core';
+import { DiscoveryModule, DiscoveryService } from '@nestjs/core';
+
 import { FactoryNameGeneratorService } from './factory-name-generator.service';
 import { FactoryPatternConfig } from './config';
 import { FactoryService } from './factory.service';
@@ -11,6 +12,7 @@ export class FactoryModule {
     return {
       module: FactoryModule,
       global: config.isGlobal,
+      imports: [DiscoveryModule],
       providers: [
         FactoryNameGeneratorService,
         {

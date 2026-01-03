@@ -1,4 +1,4 @@
 export class FactoryPatternConfig {
-  isGlobal: boolean;
+  isGlobal?: boolean;
   factoryName: string;
 }
