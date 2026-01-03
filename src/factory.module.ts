@@ -1,9 +1,8 @@
-import { DiscoveryModule, DiscoveryService } from '@nestjs/core';
+import { DiscoveryModule, DiscoveryService, ModuleRef } from '@nestjs/core';
 
 import { FactoryPatternConfig } from './config';
 import { FactoryService } from './factory.service';
 import { Module } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
 
 @Module({})
 export class FactoryModule {
@@ -20,25 +19,19 @@ export class FactoryModule {
       module: FactoryModule,
       global: config.isGlobal,
       imports: [DiscoveryModule],
-      providers: [
-        ...configs.map((nestedConfig: FactoryPatternConfig) => ({
-          provide: nestedConfig.factoryName,
-          useFactory: (
-            moduleRef: ModuleRef,
-            discoveryService: DiscoveryService,
-          ) => {
-            return new FactoryService(
-              moduleRef,
-              discoveryService,
-              nestedConfig,
-            );
-          },
-          inject: [ModuleRef, DiscoveryService],
-        })),
-      ],
-      exports: [
-        ...configs.map((config: FactoryPatternConfig) => config.factoryName),
-      ],
+      providers: configs.map((nestedConfig: FactoryPatternConfig) => ({
+        provide: nestedConfig.factoryName,
+        useFactory: (
+          moduleRef: ModuleRef,
+          discoveryService: DiscoveryService,
+        ) => {
+          return new FactoryService(moduleRef, discoveryService, nestedConfig);
+        },
+        inject: [ModuleRef, DiscoveryService],
+      })),
+      exports: configs.map(
+        (config: FactoryPatternConfig) => config.factoryName,
+      ),
     };
   }
 }
