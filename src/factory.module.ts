@@ -8,15 +8,23 @@ import { ModuleRef } from '@nestjs/core';
 
 @Module({})
 export class FactoryModule {
-  static register(config: FactoryPatternConfig) {
+  static register(
+    config:
+      | FactoryPatternConfig
+      | {
+          isGlobal?: boolean;
+          configs: Array<Omit<FactoryPatternConfig, 'isGlobal'>>;
+        },
+  ) {
+    const configs = Array.isArray(config) ? config : [config];
     return {
       module: FactoryModule,
       global: config.isGlobal,
       imports: [DiscoveryModule],
       providers: [
         FactoryNameGeneratorService,
-        {
-          provide: config.factoryName,
+        ...configs.map((nestedConfig: FactoryPatternConfig) => ({
+          provide: nestedConfig.factoryName,
           useFactory: (
             moduleRef: ModuleRef,
             discoveryService: DiscoveryService,
@@ -25,14 +33,16 @@ export class FactoryModule {
             return new FactoryService(
               moduleRef,
               discoveryService,
-              config,
+              nestedConfig,
               factoryNameGeneratorService,
             );
           },
           inject: [ModuleRef, DiscoveryService, FactoryNameGeneratorService],
-        },
+        })),
       ],
-      exports: [config.factoryName],
+      exports: [
+        ...configs.map((config: FactoryPatternConfig) => config.factoryName),
+      ],
     };
   }
 }
