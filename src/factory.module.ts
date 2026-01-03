@@ -6,18 +6,19 @@ import { Module } from '@nestjs/common';
 
 @Module({})
 export class FactoryModule {
-  static register(
-    config:
-      | FactoryPatternConfig
-      | {
-          isGlobal?: boolean;
-          configs: Array<Omit<FactoryPatternConfig, 'isGlobal'>>;
-        },
-  ) {
-    const configs = Array.isArray(config) ? config : [config];
+  static register({
+    isGlobal,
+    ...config
+  }:
+    | FactoryPatternConfig
+    | {
+        isGlobal?: boolean;
+        configs: Array<Omit<FactoryPatternConfig, 'isGlobal'>>;
+      }) {
+    const configs = 'configs' in config ? config.configs : [config];
     return {
       module: FactoryModule,
-      global: config.isGlobal,
+      global: isGlobal,
       imports: [DiscoveryModule],
       providers: configs.map((nestedConfig: FactoryPatternConfig) => ({
         provide: nestedConfig.factoryName,
@@ -25,7 +26,10 @@ export class FactoryModule {
           moduleRef: ModuleRef,
           discoveryService: DiscoveryService,
         ) => {
-          return new FactoryService(moduleRef, discoveryService, nestedConfig);
+          return new FactoryService(moduleRef, discoveryService, {
+            ...nestedConfig,
+            isGlobal,
+          });
         },
         inject: [ModuleRef, DiscoveryService],
       })),
