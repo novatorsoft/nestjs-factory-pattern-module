@@ -1,7 +1,6 @@
 import { DiscoveryService, ModuleRef } from '@nestjs/core';
 import { Injectable, Type } from '@nestjs/common';
 
-import { FactoryNameGeneratorService } from './factory-name-generator.service';
 import { FactoryPatternConfig } from './config';
 import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
 
@@ -14,13 +13,9 @@ export class FactoryService<T = unknown> {
     private readonly moduleRef: ModuleRef,
     private readonly discoveryService: DiscoveryService,
     private readonly factoryPatternConfig: FactoryPatternConfig,
-    private readonly factoryNameGeneratorService: FactoryNameGeneratorService,
   ) {
     this.serviceMap = new Map<string, Type<T>>();
-    this.factoryProviderMetaKey =
-      this.factoryNameGeneratorService.normalizeProviderName(
-        this.factoryPatternConfig.factoryName,
-      );
+    this.factoryProviderMetaKey = `${this.factoryPatternConfig.factoryName}_FACTORY`;
     this.initializeServiceMap();
   }
 
@@ -50,7 +45,7 @@ export class FactoryService<T = unknown> {
     });
   }
 
-  async getProviderAsync(type: string): Promise<T> {
+  async getProviderServiceAsync(type: string): Promise<T> {
     const ServiceClass = this.serviceMap.get(type);
     if (!ServiceClass)
       throw new Error(`Provider not found. Name (type): ${type}`);
