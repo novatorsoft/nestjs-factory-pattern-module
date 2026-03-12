@@ -1,5 +1,7 @@
 # Changelog
 
+## [1.1.1](https://github.com/novatorsoft/nestjs-factory-pattern-module/compare/v1.1.0...v1.1.1) (2026-03-12)
+
 ## 1.1.0 (2026-01-03)
 
 ### Features
